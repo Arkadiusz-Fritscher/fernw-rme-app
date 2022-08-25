@@ -1,0 +1,38 @@
+// app global css in SCSS form
+$armaturenschacht: #fda4af;
+$kontrollschacht: #c7d2fe;
+$schauloch: #a7f3d0;
+
+body {
+  background-color: white;
+  color: $dark;
+}
+
+.text-schauloch {
+  color: $schauloch !important;
+}
+
+.bg-schauloch {
+  background: $schauloch !important;
+}
+
+.text-kontrollschacht {
+  color: $kontrollschacht !important;
+}
+
+.bg-kontrollschacht {
+  background: $kontrollschacht !important;
+}
+
+.text-armaturenschacht {
+  color: $armaturenschacht !important;
+}
+
+.bg-armaturenschacht {
+  background: $armaturenschacht !important;
+}
+
+.q-page {
+  max-width: 1440px;
+  margin-inline: auto;
+}

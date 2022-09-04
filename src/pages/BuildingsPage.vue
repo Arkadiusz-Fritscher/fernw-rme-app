@@ -21,7 +21,11 @@ const $buildingStore = useBuildingStore();
 
 const initialFetch = async () => {
   if ($buildingStore.buildings.length) return;
-  const { data, meta } = await $buildingStore.getBuildings();
+  const { data, meta } = await $buildingStore.getBuildings({
+    pagination: {
+      pageSize: 20,
+    },
+  });
   $buildingStore.buildings.push(...data);
   $buildingStore.fetchMeta = meta;
 };
@@ -30,35 +34,44 @@ onBeforeMount(() => {
   initialFetch();
 });
 
-// Pagination
-const maxItems = 34;
+const loadMoreContent = async (index, done) => {
+  if (buildings.value.length > 0) {
+    const { data } = await $buildingStore.getMoreBuildings();
+    $buildingStore.buildings.push(...data);
+    done();
+  } else {
+    done((stop) => true);
+  }
+};
 
-const paginationSetup = computed(() => {
-  return { max: Math.round($buildingStore.buildings.length / maxItems) || 1, 'max-pages': 6 };
-});
-
-const paginationArray = computed(() => {
-  const startIndex = $buildingStore.paginationPage === 1 ? 0 : $buildingStore.paginationPage * maxItems - maxItems - 1;
-  const endIndex = startIndex + (maxItems - 1) >= $buildingStore.buildings.length ? -1 : startIndex + maxItems;
-
-  return $buildingStore.buildings.slice(startIndex, endIndex) || [];
+const buildings = computed(() => {
+  if (!$buildingStore.buildings.length) return [];
+  return $buildingStore.buildings;
 });
 </script>
 
 <template>
   <q-page id="building-list">
-    <div class="building-list">
-      <BuildingCard
-        v-for="building in paginationArray"
-        :id="building.id"
-        :key="building.id"
-        :attributes="building.attributes"
-      />
-    </div>
+    <q-infinite-scroll debounce="300" :offset="180" @load="loadMoreContent">
+      <div class="building-list">
+        <BuildingCard
+          v-for="building in buildings"
+          :id="building.id"
+          :key="building.id"
+          :attributes="building.attributes"
+        />
+      </div>
 
-    <div class="q-pa-lg flex flex-center">
+      <template #loading>
+        <div class="row justify-center q-my-md">
+          <q-spinner-dots color="primary" size="40px" />
+        </div>
+      </template>
+    </q-infinite-scroll>
+
+    <!-- <div class="q-pa-lg flex flex-center">
       <q-pagination v-model="$buildingStore.paginationPage" color="primary" v-bind="paginationSetup" boundary-links />
-    </div>
+    </div> -->
   </q-page>
 </template>
 

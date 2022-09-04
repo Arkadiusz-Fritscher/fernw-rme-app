@@ -73,20 +73,19 @@ export const useBuildingStore = defineStore('building', {
       }
     },
 
-    async getBuildings(
-      options = {
-        pagination: {
-          pageSize: 20,
-          page: 1,
-        },
-        populate: ['thumbnail', 'gps'],
-      }
-    ) {
+    async getBuildings(options) {
       if (this.loadedAllBuildings) return this.buildings;
       try {
         this.isFetching = true;
-        const { data, meta } = await $strapi.getBuildings(options);
-        // this.buildings.push(...data);
+        const config = {
+          pagination: {
+            pageSize: 20,
+            page: 1,
+          },
+          populate: ['thumbnail', 'gps'],
+          ...options,
+        };
+        const { data, meta } = await $strapi.getBuildings(config);
 
         this.isFetching = false;
         return { data, meta };
@@ -118,31 +117,16 @@ export const useBuildingStore = defineStore('building', {
         return { data, meta };
       }
     },
-  },
 
-  async uploadImages(files) {
-    const response = await $strapi.upload(createFormData(files, name, caption, refId, ref, field));
-    console.log(response);
-    return response;
-  },
+    async uploadImages(data, config = {}, progressCb) {
+      const response = await $strapi.upload(data, config, progressCb);
+      return response;
+    },
 
-  /**
-   * Fetch Building data from strapi api
-   * @param {FormData} file - The file(s) to upload. The value(s) can be a Buffer or Stream.
-   * @param {string} name - Name of the File.
-   * @param {string} refId - The ID of the entry which the file(s) will be linked to.
-   * @param {string} ref - The unique ID (uid) of the model which the file(s) will be linked to (default: api::object.object )
-   * @param {string} field - The field of the entry which the file(s) will be precisely linked to. (default: images)
-   * * @param {string} caption - Caption of the file.
-   */
-  async createFormData(file, name, caption, refId, ref = 'api::object.object', field = 'images') {
-    const formData = new FormData();
-    formData.append('files', file, name);
-    formData.append('refId', refId);
-    formData.append('ref', ref);
-    formData.append('field', field);
-    formData.append('fileInfo', `{"caption":${caption},"alternativeText":"${caption}"}`);
-
-    return formData;
+    async updateBuilding(id, config) {
+      const data = await $strapi.update(id, config);
+      console.log(data);
+      return data;
+    },
   },
 });

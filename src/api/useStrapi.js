@@ -82,16 +82,38 @@ export default function useStrapi() {
   /**
    * Fetch Building data from strapi api
    * @param {FormData} data - The form data to upload
+   * @param {object} customConfig - custom axios config
+   * @param {function} cdProgress - Callback for upload progress
    */
-  const upload = async (data) => {
+  const upload = async (data, customConfig, cdProgress) => {
     try {
-      // const query = qs.stringify(options, { encodeValuesOnly: true });
-      const response = await api.post('/api/upload', data);
+      const config = {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (event) => {
+          const percentComplete = Math.round((event.loaded / event.total) * 100);
+          console.log(percentComplete);
+          cdProgress(percentComplete);
+        },
+        ...customConfig,
+      };
+
+      const response = await api.post('/api/upload', data, config);
       return response;
     } catch (error) {
-      throw error;
+      // throw error;
+      console.log(error);
     }
   };
 
-  return { login, register, getUser, setDefaultAuthHeader, getBuildings, getBuilding, upload };
+  const update = async (id, config = {}) => {
+    try {
+      const { data } = await api.put(`/api/objects/${id}`, config);
+      console.log('update', data);
+      return data;
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
+  return { login, register, getUser, setDefaultAuthHeader, getBuildings, getBuilding, upload, update };
 }

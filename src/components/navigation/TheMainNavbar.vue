@@ -26,11 +26,6 @@ const menuLinks = [
     url: { name: 'sort' },
   },
   {
-    name: 'test',
-    label: 'Test',
-    url: { name: 'test' },
-  },
-  {
     name: 'buildings',
     label: 'Bauwerke',
     url: { name: 'buildings' },

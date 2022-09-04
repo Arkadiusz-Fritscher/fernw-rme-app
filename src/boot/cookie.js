@@ -35,7 +35,7 @@ export default boot(({ store }) => {
   }
 
   if (LocalStorage.has('buildings')) {
-    $buildingStore.buildings = LocalStorage.getItem('buildings');
+    $buildingStore.storedBuildings = LocalStorage.getItem('buildings');
   }
 });
 

@@ -20,7 +20,10 @@ useMeta(metaData);
 
 const building = ref({});
 const $buildingStore = useBuildingStore();
-const isUploadModalOpen = ref(true);
+const isUploadModalOpen = ref(false);
+const isLoading = computed(() => {
+  return $buildingStore.isFetching || !Object.keys(building.value).includes('id');
+});
 
 const buildingData = computed(() => {
   return [
@@ -77,8 +80,13 @@ const buildingThumbnail = computed(() => {
 
 <template>
   <q-page>
-    <div v-if="$buildingStore.isFetching || !Object.keys(building).includes('id')" class="flex justify-center">
-      <q-spinner color="secondary" />
+    <div v-if="isLoading" class="flex justify-center items-center" style="min-height: inherit">
+      <q-inner-loading
+        :showing="isLoading"
+        color="secondary"
+        label="Bauwerk wird geladen..."
+        label-class="text-secondary"
+      />
     </div>
 
     <template v-else>
@@ -102,25 +110,18 @@ const buildingThumbnail = computed(() => {
         <template v-if="building.attributes.images.data">
           <div class="building__gallery">
             <q-img
-              v-for="i in 9"
-              :key="i"
-              :src="building.attributes.images.data[0].attributes.url"
-              :alt="building.attributes.images.data[0].attributes.url"
-            />
-
-            <!-- <q-img
-              v-for="image of building.attributes.images.data"
+              v-for="image of building.attributes.images?.data"
               :key="image.id"
               :src="image.attributes.url"
               :alt="image.attributes.alternativeText"
-            /> -->
+            />
           </div>
         </template>
 
         <template v-else>
           <div class="q-mx-auto q-my-xl text-center">
             <p class="text-weight-regular text-grey-7">Zu diesem Bauwerkt wurden noch keine Bilder hinzugefügt.</p>
-            <BaseButton label="Jetzt Bilder hinzufügen" />
+            <BaseButton label="Jetzt Bilder hinzufügen" @click="isUploadModalOpen = true" />
           </div>
         </template>
       </main>
